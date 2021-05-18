@@ -13,11 +13,14 @@
 
 // Library for DHT sensor
 #include "DHT.h"
+//Library for audio
+#include <Record.h>
 
 // Libraries for WiFi and HTTP
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <SD_file.h>
+
 
 // Define deep sleep options
 uint64_t uS_TO_S_FACTOR = 1000000;
@@ -70,7 +73,7 @@ boolean print_wakeup_reason() {
 
 //_____________________________________________________________________________setup
 void setup() {
-  default_config("Bemoon", 20,5,4410,"bemoon","bemmon");
+  default_config("Bemoon", 10,10,4410,"beemon","12345678");
   // content;
   // Start serial communication for debugging purposes
   Serial.begin(115200);
@@ -94,19 +97,20 @@ void setup() {
     Serial.println("ERROR - SD card initialization failed!");
     return;    // init failed
   }
-    readFileconfig(SD, "/config.txt");
+   I2S_setup();
+  readFileconfig(SD, "/config.txt");
 
-  // If the sensor.txt file doesn't exist
+  // If the sensor.csv file doesn't exist
   // Create a file on the SD card
-  File file = SD.open("/sensor.txt");
-  if (!file) {
-    Serial.println("File sensor.txt doens't exist");
+  File file1 = SD.open("/sensor.csv");
+  if (!file1) {
+    Serial.println("File sensor.csv doens't exist");
     Serial.println("Creating file...");
-    writeFile(SD, "/sensor.txt", "");
+    writeFile(SD, "/sensor.csv", "");
   } else {
     Serial.println("File already exists");
   }
-  file.close();
+  file1.close();
   // Enable Timer wake_up
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
 
@@ -123,6 +127,10 @@ void setup() {
   }
   // Configure the wake up source KEY1 (Pin 36)
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_36, 0);
+    Serial.println("audio starten");
+
+    //Record Start
+   record_start(TIME_TO_recording);
 
   // Start deep sleep
   Serial.println("DONE! Going to sleep now.");
@@ -164,7 +172,7 @@ void wifiConnect( const char* ssid ,const char* password ) {
 void sendDataHTTP() {
   if ((WiFi.status() == WL_CONNECTED)) { //Check the current connection status
     Serial.println("Connected to the WiFi network");
-    readFile(SD, "/sensor.txt");
+    readFile(SD, "/sensor.csv");
     HTTPClient http;
     Serial.println(content);
     http.begin("http://193.196.52.234/sensor2.php");
@@ -176,8 +184,8 @@ void sendDataHTTP() {
       String payload = http.getString();
       Serial.println(httpCode);
       Serial.println(payload);
-      String fileName = "/s" + payload + "." + "txt";
-      renameFile(SD, "/sensor.txt", fileName);
+      String fileName = "/s" + payload + "." + "csv";
+      renameFile(SD, "/sensor.csv", fileName);
     }
     else {
       Serial.println("Error on HTTP request");
@@ -192,12 +200,12 @@ void sendDataHTTP() {
   }
 }
 //_____________________________________________________________________________logSDCard
-// Write the sensor readings on the SD card in sensor.txt
+// Write the sensor readings on the SD card in sensor.csv
 void logSDCard() {
   dataMessage = String(temperature) + "," + String(humidity) + ";";
   Serial.print("Save data: ");
   Serial.println(dataMessage);
-  appendFile(SD, "/sensor.txt", dataMessage.c_str());
+  appendFile(SD, "/sensor.csv", dataMessage.c_str());
 }
 
 void loop() {
