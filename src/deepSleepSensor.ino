@@ -97,8 +97,10 @@ void setup() {
     Serial.println("ERROR - SD card initialization failed!");
     return;    // init failed
   }
+  //mic _setup to use
    I2S_setup();
-  readFileconfig(SD, "/config.txt");
+   //read  varaible from config file // user,SSID,password,Time to sleep,-record,sampling_rate
+  readFileconfig(SD, "/cgonfig.txt");
 
   // If the sensor.csv file doesn't exist
   // Create a file on the SD card

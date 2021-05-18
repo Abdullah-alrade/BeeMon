@@ -62,15 +62,23 @@ String getValue(String data, char separator, int index)
   while (file.available()) {
        char c =  file.read();
         line +=c;
+  
   }
  
-   name = (getValue(line,';',0));
-   SSID = getValue(line,';',1).c_str();
-   Passowrd = getValue(line,';',2).c_str();
-   TIME_TO_SLEEP =getValue(line,';',4).toInt();
-   TIME_TO_recording = getValue(line,';',5).toInt();
-   Sampling_Rate = getValue(line,';',6).toInt();
-   file.close();
+   String temp_str = (getValue(line,'\n',0));
+   name = (getValue(temp_str,'=',1));
+   temp_str = getValue(line,'\n',1);
+    SSID = getValue(temp_str,'=',1).c_str();
+   temp_str = getValue(line,'\n',2);
+   Passowrd = getValue(temp_str,'=',1).c_str();
+   temp_str =getValue(line,'\n', 3);
+  TIME_TO_SLEEP =getValue(temp_str ,'=',1).toInt();
+   temp_str =getValue(line,'\n', 4);
+  TIME_TO_recording = getValue(temp_str,'=',1).toInt();
+
+   String str3 =getValue(line,'\n', 5);
+  Sampling_Rate = getValue(str3,'=',1).toInt();
+  file.close();
   
 }
 /***************************************************************************************************/
