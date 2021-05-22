@@ -5,6 +5,14 @@
   Safak Karman (91kasa@hft-stuttgart.de),
   Henry Bahnasawy (91elhe1bif@hft-stuttgart.de)
 *********/
+//*********************************************************
+//    --------RTC NEW--------------
+#include "TimeLib.h"
+#include "DS1302RTC.h"
+
+// Set pins: CE / RST (je nach Modul), IO, CLK
+DS1302RTC RTC(5, 21, 0);
+//***********************************************
 
 // Libraries for the SD card
 #include "FS.h"
@@ -26,7 +34,7 @@
 uint64_t uS_TO_S_FACTOR = 1000000;
   
 bool debug = true;
-#define DHTPIN 0               // DHT Pin 0
+#define DHTPIN 22               // DHT Pin 0
 #define DHTTYPE DHT22         // DHT 22  (AM2302)
 
 // Create object
@@ -73,11 +81,24 @@ boolean print_wakeup_reason() {
 
 //_____________________________________________________________________________setup
 void setup() {
+  //************************************************
+  //    --------RTC NEW--------------
+ RTC.haltRTC(false);
+  if (RTC.haltRTC()) {
+    Serial.println("DS1302 ist angehalten. Mit RTC.set wird die Uhr automaisch wieder gestartet.");
+  }
+ RTC.writeEN(false);
+  if (!RTC.writeEN()) {
+    Serial.println("Der DS1302 / VMA301 ist Schreibgeschuetzt, dies ist normal.");
+    Serial.println();
+  }
+
+  //************************************************
   default_config("Bemoon", 10,10,4410,"beemon","12345678");
   // content;
   // Start serial communication for debugging purposes
   Serial.begin(115200);
-  delay(1000); //Take some time to open up the Serial Monitor
+  delay(5000); //Take some time to open up the Serial Monitor
 
   boolean button = print_wakeup_reason();
   // Initialize SD card
@@ -137,12 +158,43 @@ void setup() {
   // Start deep sleep
   Serial.println("DONE! Going to sleep now.");
     Serial.println("________________________________________");
-  
+ // uhrzeit_setzen("1621690260");
   esp_deep_sleep_start();
 }
+//*****************************************
+//    --------RTC NEW--------------
+int uhrzeit_setzen(String timestamp) {
+  time_t zeit = timestamp.toInt();
+  
+  Serial.println("Uhrzeit setzen");
+  RTC.writeEN(false);
+  if ( ! RTC.writeEN() ) {
+    Serial.println("DS1302 ist Schreibgeschuetzt, Schreibschutz wird aufgehoben...");
+    RTC.writeEN(true);
+  }
+ // Serial.println("da dem " + Jahr);
+  setTime(zeit);
+  Serial.println(now());
+  if (RTC.set(now()) == 0) {
+    Serial.println("Erfolg - Uhrzeit wurde gesetzt.");
+    return 0;
+  }
+  else
+  {
+    Serial.println("Fehlschlag - Uhrzeit konnte nicht gesetzt werden.");
+    Serial.println("Eventuell wurden VCC und Ground nicht korrekt angegeben.");
+    return 1;
+  }
+  
+}
+//**************************************************
 
 // Function to get temperature
 void getReadings() {
+  ///************************************
+  //    --------RTC NEW--------------
+  Serial.println(RTC.get());
+//*****************************************************
   temperature = dht.readTemperature(); // Temperature in Celsius
   humidity = dht.readHumidity(); // Humditiy in percentage
   if ( isnan(temperature) || isnan(humidity)) {
@@ -186,7 +238,8 @@ void sendDataHTTP() {
       String payload = http.getString();
       Serial.println(httpCode);
       Serial.println(payload);
-      String fileName = "/s" + payload + "." + "csv";
+     // uhrzeit_setzen (payload);
+      String fileName = "/" + payload + "." + "csv";
       renameFile(SD, "/sensor.csv", fileName);
     }
     else {
