@@ -98,7 +98,7 @@ void setup() {
   // content;
   // Start serial communication for debugging purposes
   Serial.begin(115200);
-  delay(5000); //Take some time to open up the Serial Monitor
+  delay(1000); //Take some time to open up the Serial Monitor
 
   boolean button = print_wakeup_reason();
   // Initialize SD card
