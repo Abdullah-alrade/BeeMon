@@ -148,7 +148,7 @@ void setup() {
     sendDataHTTP();
   } else {
     getReadings();
-    logSDCard();
+    logSDCard(timestamp);
     
     //Record Start
     String recFileName = "/" + timestamp + ".wav";
