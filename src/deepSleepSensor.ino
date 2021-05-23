@@ -229,8 +229,7 @@ void sendDataHTTP() {
     readFile(SD, "/sensor.csv");
     HTTPClient http;
     Serial.println(content);
-    http.begin("http://193.196.52.234/api/sensor.php");
-    content += name;
+    http.begin("http://193.196.52.234/api/sensor.php?id=" + name);
     int httpCode = http.POST(content);                                        //Make the request
 
     if (httpCode > 0) { //Check for the returning code
