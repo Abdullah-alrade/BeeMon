@@ -129,7 +129,7 @@ void setup() {
   if (!file1) {
     Serial.println("File sensor.csv doens't exist");
     Serial.println("Creating file...");
-    writeFile(SD, "/sensor.csv",  "temperature;humidity;time\n");
+    writeFile(SD, "/sensor.csv",  "temperature;humidity;time");
   } else {
     Serial.println("File already exists");
   }
@@ -257,7 +257,7 @@ void sendDataHTTP() {
 //_____________________________________________________________________________logSDCard
 // Write the sensor readings on the SD card in sensor.csv
 void logSDCard() {
-  dataMessage = String(temperature) + ";" + String(humidity) + ";" + RTC.get() + "\n";
+  dataMessage = "\n" + String(temperature) + ";" + String(humidity) + ";" + RTC.get();
   Serial.print("Save data: ");
   Serial.println(dataMessage);
   appendFile(SD, "/sensor.csv", dataMessage.c_str());
