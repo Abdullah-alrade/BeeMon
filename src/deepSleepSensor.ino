@@ -153,7 +153,8 @@ void setup() {
     Serial.println("audio starten");
 
     //Record Start
-   record_start(TIME_TO_recording);
+   String recFileName = "/" + RTC.get() + ".wav";
+   record_start(TIME_TO_recording, recFileName);
 
   // Start deep sleep
   Serial.println("DONE! Going to sleep now.");
