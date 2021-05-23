@@ -121,7 +121,7 @@ void setup() {
   //mic _setup to use
    I2S_setup();
    //read  varaible from config file // user,SSID,password,Time to sleep,-record,sampling_rate
-  readFileconfig(SD, "/cgonfig.txt");
+  readFileconfig(SD, "/config.txt");
 
   // If the sensor.csv file doesn't exist
   // Create a file on the SD card
@@ -229,7 +229,7 @@ void sendDataHTTP() {
     readFile(SD, "/sensor.csv");
     HTTPClient http;
     Serial.println(content);
-    http.begin("http://193.196.52.234/sensor2.php");
+    http.begin("http://193.196.52.234/api/sensor.php");
     content += "-" + name;
     int httpCode = http.POST(content);                                        //Make the request
 
@@ -238,7 +238,8 @@ void sendDataHTTP() {
       String payload = http.getString();
       Serial.println(httpCode);
       Serial.println(payload);
-     // uhrzeit_setzen (payload);
+      //uhrzeit_setzen (payload);
+      //String dateTime = payload.remove(0, 1);
       String fileName = "/" + payload + "." + "csv";
       renameFile(SD, "/sensor.csv", fileName);
     }
