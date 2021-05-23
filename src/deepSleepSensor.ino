@@ -140,21 +140,24 @@ void setup() {
   // Start the DHT22 sensor
   dht.begin();
   delay(4000); // 4 seconds pre-reading time for the sensor (the sensor is sometimes a little slow)
-
+  
+  time_t timestamp = RTC.get();
+  
   if (button) { // check if KEY1 was pressed
     wifiConnect(SSID.c_str() ,Passowrd.c_str());
     sendDataHTTP();
   } else {
     getReadings();
     logSDCard();
+    
+    //Record Start
+    String recFileName = "/" + timestamp + ".wav";
+    record_start(TIME_TO_recording, recFileName);
   }
+  
   // Configure the wake up source KEY1 (Pin 36)
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_36, 0);
     Serial.println("audio starten");
-
-    //Record Start
-   String recFileName = "/" + RTC.get() + ".wav";
-   record_start(TIME_TO_recording, recFileName);
 
   // Start deep sleep
   Serial.println("DONE! Going to sleep now.");
@@ -257,8 +260,8 @@ void sendDataHTTP() {
 }
 //_____________________________________________________________________________logSDCard
 // Write the sensor readings on the SD card in sensor.csv
-void logSDCard() {
-  dataMessage = "\n" + String(temperature) + ";" + String(humidity) + ";" + RTC.get();
+void logSDCard(time_t timestamp) {
+  dataMessage = "\n" + String(temperature) + ";" + String(humidity) + ";" + timestamp;
   Serial.print("Save data: ");
   Serial.println(dataMessage);
   appendFile(SD, "/sensor.csv", dataMessage.c_str());
