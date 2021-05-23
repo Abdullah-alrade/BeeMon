@@ -1,12 +1,8 @@
 #include "Arduino.h"
 #include "Record.h"
 
-
 /***********************************************************************************************/
-   // second
-  String recFileName ="/audio.wav";
- 
-  const int headerSize = 44;
+const int headerSize = 44;
 // int const waveDataSize = record_time * 88000;
 const int numCommunicationData = 8000;
 int const numPartWavData = numCommunicationData/4;
@@ -122,7 +118,7 @@ void CreateWavHeader(byte* header, int waveDataSize){
 }
 
 /********************************************************************************************************Start*/
-void record_start(int record_time){
+void record_start(int record_time, String recFileName){
    int const waveDataSize = record_time * 88000;
  Serial.println("start");
   CreateWavHeader(header, waveDataSize);
