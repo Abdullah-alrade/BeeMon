@@ -151,7 +151,7 @@ void setup() {
     logSDCard(timestamp);
     
     //Record Start
-    String recFileName = "/" + timestamp + ".wav";
+    String recFileName = "/" + timestamp + String(".wav");
     record_start(TIME_TO_recording, recFileName);
   }
   
