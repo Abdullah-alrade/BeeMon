@@ -23,8 +23,6 @@
 /***********************************************************************************************/
 //set user_config
 static AC101 ac;
-extern int record_time ;  // second
-extern String recFileName ;  //.wav
 
 extern const int headerSize;  
 extern const int waveDataSize;
@@ -39,9 +37,7 @@ void I2S_setup();
 int I2S_Read(char *data, int numData);
 void I2S_Write(char *data, int numData);
 void  I2S_Init();
-void record_start(int record_time);
+void record_start(int record_time, String recFileName);
 
 /***************************************************************************************************/
-
-
 #endif
