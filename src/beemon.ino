@@ -1,9 +1,9 @@
 /*********
-  BEEMON v0.1
-  Abdualah Al Rade (91alab1bif@hft-stuttgart.de),
-  Medjen Izairi (91izme1bif@hft-stuttgart.de),
-  Safak Karman (91kasa@hft-stuttgart.de),
-  Henry Bahnasawy (91elhe1bif@hft-stuttgart.de)
+  BEEMON v0.2
+  Abdualah (91alab1bif@hft-stuttgart.de),
+  Medjen (91izme1bif@hft-stuttgart.de),
+  Safak (91kasa1bif@hft-stuttgart.de),
+  Henry (91elhe1bif@hft-stuttgart.de)
 *********/
 //*********************************************************
 //    --------RTC NEW--------------
