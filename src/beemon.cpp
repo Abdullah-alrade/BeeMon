@@ -1,5 +1,5 @@
 /*********
-  BEEMON v0.2
+  BEEMON v0.3
   Abdualah (91alab1bif@hft-stuttgart.de),
   Medjen (91izme1bif@hft-stuttgart.de),
   Safak (91kasa1bif@hft-stuttgart.de),
@@ -163,6 +163,78 @@ void wifiConnect(const char *ssid, const char *password)
   Serial.println("Mac address: " + WiFi.macAddress());
 }
 
+void sendWAVHTTP(String fileName)
+{
+  if ((WiFi.status() == WL_CONNECTED))
+  { //Check the current connection status
+    Serial.println("Connected to the WiFi network");
+    File file = SD.open(fileName, FILE_READ);
+    if (!file)
+    {
+      Serial.println("FILE IS NOT AVAILABLE!");
+      return;
+    }
+
+    fileName.remove(0, 8);
+
+    Serial.println("===> Upload FILE to Server");
+
+    HTTPClient client;
+    client.begin("http://193.196.52.234/api/audio.php?id=" + uniqueId + "&name=" + fileName);
+    client.addHeader("Content-Type", "audio/wav");
+    int httpResponseCode = client.sendRequest("POST", &file, file.size());
+    Serial.print("httpResponseCode: ");
+    Serial.println(httpResponseCode);
+
+    if (httpResponseCode == 200)
+    {
+      String response = client.getString();
+      Serial.println("Upload: " + fileName);
+      Serial.println(response);
+      String oldFileName = "/audio/n" + fileName;
+      String newFileName = "/audio/y" + fileName;
+      renameFile(SD, oldFileName, newFileName);
+    }
+    else
+    {
+      Serial.println("Error");
+    }
+    file.close();
+    client.end();
+  }
+  else
+  {
+    Serial.println("No wifi connection");
+  }
+}
+
+void uploadWAV()
+{
+  File root = SD.open("/audio");
+  if (root)
+  {
+    File file = root.openNextFile();
+    while (file)
+    {
+      if (!file.isDirectory())
+      {
+        String fileName = file.name();
+        if (fileName.indexOf("/n") > 0)
+        { // check if file is already uploaded
+          Serial.print("  FILE: ");
+          Serial.println(fileName);
+          sendWAVHTTP(fileName);
+        }
+      }
+      file = root.openNextFile();
+    }
+  }
+  else
+  {
+    Serial.println("Failed to open directory");
+  }
+}
+
 void sendDataHTTP()
 {
   if ((WiFi.status() == WL_CONNECTED))
@@ -172,17 +244,17 @@ void sendDataHTTP()
     HTTPClient http;
     Serial.println(content);
     http.begin("http://193.196.52.234/api/sensor.php?id=" + uniqueId);
-    int httpCode = http.POST(content); // Make the request
+    int httpResponseCode = http.POST(content); // Make the request
 
-    if (httpCode > 0)
+    if (httpResponseCode == 200)
     { // Check for the returning code
+      String response = http.getString();
+      Serial.print("httpResponseCode: ");
+      Serial.println(httpResponseCode);
+      Serial.println(response);
+      setRTCTime(response);
 
-      String payload = http.getString();
-      Serial.println(httpCode);
-      Serial.println(payload);
-      setRTCTime(payload);
-
-      String fileName = "/sensor/" + payload + "." + "csv";
+      String fileName = "/sensor/" + response + "." + "csv";
       renameFile(SD, "/sensor/data.csv", fileName);
     }
     else
@@ -288,7 +360,7 @@ void setup()
   {                                              // check if KEY1 was pressed
     wifiConnect(SSID.c_str(), Password.c_str()); // connect to wifi with SSID and password from config file
     sendDataHTTP();                              // send temperature and humidity data to server
-    // TODO: upload wav files to server
+    uploadWAV();                                 // upload all wav files to the server
     WiFi.mode(WIFI_OFF);
   }
   else
@@ -297,7 +369,7 @@ void setup()
     logSDCard(timestamp); // save temperature and humidity data to the sd card with the current timestamp
 
     // Start audio recording
-    String recFileName = "/audio/" + String(timestamp) + ".wav";
+    String recFileName = "/audio/n" + String(timestamp) + ".wav";
     Serial.println(recFileName);
     record_start(recordingTime, recFileName);
   }
